@@ -1,1 +1,9 @@
 .venv/
+__pycache__/
+
+*.pyc
+
+.env
+super_user.txt
+backend/stride/__pycache__/
+backend/stride/__pycache__/
