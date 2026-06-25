@@ -18,6 +18,11 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("ALLOWED_ORIGINS", "").split(",")
+    if origin.strip() # if there are spaces after comma then strip
+]
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -39,21 +44,29 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'accounts',
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
 ]
 
+
 MIDDLEWARE = [
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ALLOWED_ORIGINS = list(ALLOWED_ORIGINS)
+CORS_ALLOW_CREDENTIALS = True
+
 
 ROOT_URLCONF = 'stride.urls'
 
@@ -87,7 +100,7 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
 
-    "AUTH_HEADER_TYPES": ("Bearer",),
+  
 }
 
 WSGI_APPLICATION = 'stride.wsgi.application'
