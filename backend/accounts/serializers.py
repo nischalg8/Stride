@@ -7,23 +7,23 @@ User = get_user_model()
 
 class SignUpSerializer(serializers.ModelSerializer):
 
-        password1 = serializers.CharField(write_only=True, required=True)
-        password2 = serializers.CharField(write_only=True, required=True)
+        password = serializers.CharField(write_only=True, required=True)
+        confirm_password = serializers.CharField(write_only=True, required=True)
         class Meta:
                 model = User
-                fields = ['username','email','password1', 'password2', 'first_name','last_name']
+                fields = ['first_name','last_name','username','email','password', 'confirm_password', ]
 
         def validate(self, data):
                 
-            if data.get('password1') != data.get('password2'):
+            if data.get('password') != data.get('confirm_password'):
                         raise serializers.ValidationError("Passwords do not match!")
-            validate_password(data.get('password1'))
+            validate_password(data.get('password'))
             return data
 
         def create(self, validated_data):
             
-           password = validated_data.pop("password1")
-           validated_data.pop("password2")
+           password = validated_data.pop("password")
+           validated_data.pop("confirm_password")
 
            user = User.objects.create_user(
                 username=validated_data.get('username'),
@@ -50,20 +50,19 @@ class LoginSerializer(serializers.Serializer):
                 password = data.get('password')
 
                 if username and password:
-                    user = authenticate(username=username, password =password)
+                    user = authenticate(username=username, password=password)
 
                     if user:
-                            if not user.is_active:
-                                    raise serializers.ValidationError("User account is disabled.")
-                            data['user'] = user
-                    
-
+                        if not user.is_active:
+                            raise serializers.ValidationError({"detail": "User account is disabled."})
+                        data["user"] = user
                     else:
-                            raise serializers.ValidationError('Invalid Credentials')
-                    
-                else: 
-                    raise serializers.ValidationError("Enter both username and password")
-                
+                        if User.objects.filter(username=username).exists():
+                            raise serializers.ValidationError({"detail": "Incorrect password."})
+                        raise serializers.ValidationError({"detail": "Account does not exist."})
+                else:
+                    raise serializers.ValidationError({"detail": "Enter both username and password."})
+
                 return data
             
         

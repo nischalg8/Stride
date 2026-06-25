@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
+
+@import "tailwindcss";
+
+@custom-variant dark  (&:where(.dark, .dark *));
+
+
+*{
+  font-family: "Manrope", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+}
+
+@theme {
+  /* Stride - Growth Theme */
+
+  --color-green-50: #F2F7F5;
+  --color-green-100: #DDEBE5;
+  --color-green-200: #B8D5C7;
+  --color-green-300: #86B39C;
+  --color-green-400: #4F7C62;
+  --color-green-500: #2F5D50;
+  --color-green-600: #234438;
+  --color-green-700: #1B332A;
+
+  --color-cream-50: #FCFBF8;
+  --color-cream-100: #F7F4EE;
+  --color-cream-200: #EFE8DD;
+
+  --color-accent-500: #C9A66B;
+
+  --color-neutral-900: #1E1E1E;
+  --color-neutral-500: #737373;
+}
+

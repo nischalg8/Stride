@@ -26,3 +26,9 @@
  2. Defined Login,SignUp and Logout View for creating and loggin in.
  3. Defined custom authentication class as login mechanism is also custom by setting tokens as http only cookies.
  
+
+### 25-June-26-Accounts-Setup CSRF Protection
+
+1. Researched at OWASP to setup CSRF protection.
+2. Blocked state changing requests from any other site except from the frontend by writing a middleware to examine the origin of the request.
+3. Instead of using tokens done fetch metadata + examining origin.
