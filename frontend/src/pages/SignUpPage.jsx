@@ -44,7 +44,7 @@ export default function SignUpPage() {
     }
     return (
       data.message ||
-      data.detail  ||
+      data.detail ||
       "Something went wrong."
     );
   };
@@ -172,14 +172,15 @@ export default function SignUpPage() {
                     { key: "uppercase", label: "One uppercase letter" },
                     { key: "number", label: "One number" },
                     { key: "special", label: "One special character (!@#$%)" },
-                  ].map(({ key, label }) => {
-                    <div key={key} className="flex items-center gap-2">
-                      <div className={`w-1.5 h-1.5 rounded-full ${passwordChecks[key] ? "bg-green-500" : "bg-neutral-300"}`} />
-                      <span className={`text-xs ${passwordChecks[key] ? "text-green-600" : "text-neutral-400"}`}>
-                        {label}
-                      </span>
-                    </div>
-                  })
+                  ].map(({ key, label }) => (
+                      
+                      <div key={key} className="flex items-center gap-2">
+                        <div className={`w-1.5 h-1.5 rounded-full ${passwordChecks[key] ? "bg-green-500" : "bg-neutral-300"}`} />
+                        <span className={`text-xs ${passwordChecks[key] ? "text-green-600" : "text-neutral-400"}`}>
+                            {label}
+                        </span>
+                      </div>
+                  ))
                 }
               </div>
             )

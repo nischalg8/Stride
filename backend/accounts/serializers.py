@@ -17,20 +17,29 @@ class SignUpSerializer(serializers.ModelSerializer):
                 
             if data.get('password') != data.get('confirm_password'):
                         raise serializers.ValidationError("Passwords do not match!")
+            
             validate_password(data.get('password'))
+          
             return data
-
+      
+        def validate_email(self, value):
+            if User.objects.filter(email=value).exists():
+                raise serializers.ValidationError("Email already exists")
+            return value
+     
         def create(self, validated_data):
             
            password = validated_data.pop("password")
            validated_data.pop("confirm_password")
-
+            
+           
            user = User.objects.create_user(
                 username=validated_data.get('username'),
                 email=validated_data.get('email'),
                 password=password,
                 first_name=validated_data.get('first_name', ''),
-                last_name=validated_data.get('last_name', '')
+                last_name=validated_data.get('last_name', ''),
+                is_active=False
             )   
 
             # create related profile
@@ -65,4 +74,20 @@ class LoginSerializer(serializers.Serializer):
 
                 return data
             
+class ResetPasswordSerializer(serializers.Serializer):
+    
+    
+    token = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
+    
+    def validate(self, data):
         
+        if data.get("password") != data.get("confirm_password"):
+            raise serializers.ValidationError(
+                "Passwords do not match."
+            )
+            
+        validate_password(data.get("password"))
+        data.pop("confirm_password")
+        return data
