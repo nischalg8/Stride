@@ -66,9 +66,8 @@ class LoginSerializer(serializers.Serializer):
                             raise serializers.ValidationError({"detail": "User account is disabled."})
                         data["user"] = user
                     else:
-                        if User.objects.filter(username=username).exists():
-                            raise serializers.ValidationError({"detail": "Incorrect password."})
-                        raise serializers.ValidationError({"detail": "Account does not exist."})
+                       
+                        raise serializers.ValidationError({"detail": "Invalid username or password."})
                 else:
                     raise serializers.ValidationError({"detail": "Enter both username and password."})
 

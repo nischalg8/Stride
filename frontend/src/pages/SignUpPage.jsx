@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom"
 import { Target } from "lucide-react"
 import { useState } from "react"
 import { API_BASE_URL } from "../config";
+import { toast } from "react-toastify";
 
 export default function SignUpPage() {
 
@@ -37,6 +38,7 @@ export default function SignUpPage() {
         special: /[!@#$%^&*]/.test(value),
       })
     }
+
   }
   const getErrorMessage = (data, statusText) => {
     if (!data || typeof data !== "object") {
@@ -49,12 +51,19 @@ export default function SignUpPage() {
     );
   };
 
+  const isValidEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     try {
       if (!allValid) {
         setError("Password does not meet requirements");
+        return;
+      }
+      if (!isValidEmail(formData.email)) {
+        setError("Enter Valid email address");
         return;
       }
       const response = await fetch(`${API_BASE_URL}/accounts/signup/`, {
@@ -77,7 +86,13 @@ export default function SignUpPage() {
         setError(getErrorMessage(data, response.statusText));
         return;
       }
-      navigate("/login")
+      // after successful signup
+      toast.success(data?.message || "Account created successfully", {
+        autoClose: 5000,
+      });
+
+      navigate("/login");
+
     } catch (err) {
       setError("Cannot connect to server");
     }
@@ -173,13 +188,13 @@ export default function SignUpPage() {
                     { key: "number", label: "One number" },
                     { key: "special", label: "One special character (!@#$%)" },
                   ].map(({ key, label }) => (
-                      
-                      <div key={key} className="flex items-center gap-2">
-                        <div className={`w-1.5 h-1.5 rounded-full ${passwordChecks[key] ? "bg-green-500" : "bg-neutral-300"}`} />
-                        <span className={`text-xs ${passwordChecks[key] ? "text-green-600" : "text-neutral-400"}`}>
-                            {label}
-                        </span>
-                      </div>
+
+                    <div key={key} className="flex items-center gap-2">
+                      <div className={`w-1.5 h-1.5 rounded-full ${passwordChecks[key] ? "bg-green-500" : "bg-neutral-300"}`} />
+                      <span className={`text-xs ${passwordChecks[key] ? "text-green-600" : "text-neutral-400"}`}>
+                        {label}
+                      </span>
+                    </div>
                   ))
                 }
               </div>
@@ -200,7 +215,7 @@ export default function SignUpPage() {
           {
             error &&
             (
-              <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-2.5 rounded-lg">
+              <div className="bg-red-50 border  text-red-600 text-sm font-bold px-4 py-2.5 rounded-lg">
                 {error}
               </div>
             )

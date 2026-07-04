@@ -2,9 +2,12 @@ import { Link, useNavigate } from "react-router-dom"
 import { Target } from "lucide-react"
 import { useState } from "react";
 import { API_BASE_URL } from "../config";
+import { toast } from "react-toastify";
+
 export default function LoginPage() {
 
   const navigate = useNavigate();
+
 
   const [loginFormData, setLoginFormDate] = useState({
     username: "",
@@ -49,7 +52,8 @@ export default function LoginPage() {
         return;
       }
 
-      navigate("/dashboard");
+     toast.success(data.message, {autoClose: 2000,});
+     navigate("/dashboard");
     } catch (err) {
       setError("Cannot connect to the server!");
     }
@@ -79,6 +83,7 @@ export default function LoginPage() {
         <h1 className="text-2xl font-bold text-neutral-900 mb-1">Welcome back</h1>
         <p className="text-neutral-500 text-sm mb-6">Log in to continue your progress</p>
 
+     
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
@@ -110,7 +115,7 @@ export default function LoginPage() {
             />
           </div>
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-2.5 rounded-lg">
+            <div className=" bg-red-50 text-red-600 text-sm font-bold px-4 py-2.5 rounded-lg">
               {error}
             </div>
           )}
