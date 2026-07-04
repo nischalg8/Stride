@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+    'django_celery_beat',
 ]
 
 
@@ -160,12 +161,35 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+#CELERY setup for automatic task
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
+CELERY_TIMEZONE = os.getenv("CELERY_TIMEZONE", "UTC")
+CELERY_ENABLE_UTC = True
 
 
+#REDIS for caching
+if os.environ.get("ENV") == "production":
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": os.environ.get("REDIS_URL"),
+            "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+        }
+    }
+else:
+    CACHES = {
+        "default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}
+    }
+    
+# EMAIL setup
+ 
+if os.environ.get("ENV")=="production":
+     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend" # for prod
+else:
+     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend" # for dev
 
-# EMAIL 
-#EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend" # for prod
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend" # for dev
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True

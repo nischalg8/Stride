@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 
 from .serializers import SignUpSerializer, LoginSerializer, ResetPasswordSerializer
 
@@ -50,6 +51,7 @@ class SignUpAPIView(APIView):
                 user=user,
                 token=EmailToken.generate_token(),
                 purpose="verify_email",
+                
             )
         
         send_verify_email(user, token.token)
@@ -60,70 +62,72 @@ class SignUpAPIView(APIView):
             },
             status=status.HTTP_201_CREATED,
         )
-
 class VerifyEmailAPIView(APIView):
-    
     authentication_classes = []
     permission_classes = [AllowAny]
-    
+
     def get(self, request):
-        
         token_str = request.query_params.get("token")
-        
         if not token_str:
-            return Response(
-                {"message": "Token required"},
-                status = status.HTTP_400_BAD_REQUEST,
-            )
-            
+            return Response({"message": "Token required"}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
-            token = EmailToken.objects.get(
-                token = token_str,
-                purpose="verify_email",
-                is_used = False
-                )
-            
+            token = EmailToken.objects.get(token=token_str, purpose="verify_email")
         except EmailToken.DoesNotExist:
-            return Response(
-                {"message": "Invalid Link."},
-                status= status.HTTP_400_BAD_REQUEST
-            )
-            
+            return Response({"message": "Invalid link"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = token.user
+
+        # Already used, but user already verified  so treat as success
+        if token.is_used:
+            if user.is_active:
+                return Response({"message": "Email already verified."}, status=status.HTTP_200_OK)
+            return Response({"message": "Invalid or expired link"}, status=status.HTTP_400_BAD_REQUEST)
+
         if token.is_expired():
-            
-            return Response(
-                {"message":"Verification link has expired. Retry!"},
-                status = status.HTTP_400_BAD_REQUEST
-            )
-        
-        token.is_used=True
+            return Response({"message": "Link expired"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.is_active = True
+        user.save()
+        token.is_used = True
         token.save()
-        
-        token.user.is_active= True
-        token.user.save()
-        
-        
-        return Response(
-            {"message": "Email verified successfully. You can now login to your account!"},
-            status=status.HTTP_200_OK,
-        )
-        
+
+        return Response({"message": "Email verified successfully."}, status=status.HTTP_200_OK)
+    
+    
+MAX_ATTEMPTS = 5
+LOCK_TIME = 15 * 60    
+
 class LoginAPIView(APIView):
     
     authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request):
+        username = request.data.get("username")
+        key = f"login_attempts:{username}"
+        attempts = cache.get(key, 0)
+    
+        if attempts >= MAX_ATTEMPTS:
+            return Response(
+                {"message":"Too many attempts. Try again later."},
+                status = status.HTTP_429_TOO_MANY_REQUESTS,
+            )
         serializer = LoginSerializer(data=request.data)
+    
         if not serializer.is_valid():
+            cache.set(key, attempts+1, timeout=LOCK_TIME)
             return Response(
                 {"message": _extract_error_message(serializer.errors)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         user = serializer.validated_data["user"]
+        cache.delete(key)
+        
         refresh = RefreshToken.for_user(user=user)
         access = refresh.access_token
+        
         response = Response({"message": "Login Successful"}, status=status.HTTP_200_OK)
         response.set_cookie(
             key="refresh",

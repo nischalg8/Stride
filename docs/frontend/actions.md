@@ -1,0 +1,3 @@
+### 04-July-26-Accounts-Toastify for Feedback Messages
+
+1. Previously, feedback messages were passed through React Router's navigation state, which meant they only worked in the context of a redirect and disappeared on refresh which are not great for things like form validation errors or failed API calls that don't involve navigation. So, switched to the react-toastify library instead. Toasts can now be triggered from anywhere in the app, decoupling "showing a message" from "navigating to a page" much more flexible.

@@ -2,8 +2,13 @@ import { useNavigate } from "react-router-dom"
 import { API_BASE_URL } from "../config"
 import { LogOut } from "lucide-react"
 
+
+import {toast} from "react-toastify";
+
 export default function DashboardPage() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+
 
   const handleLogout = async () => {
     try {
@@ -11,6 +16,7 @@ export default function DashboardPage() {
         method: "POST",
         credentials: "include",
       })
+      toast.success("Logged out.", {autoClose: 2000, });
     } catch (err) {
       console.error(err)
     } finally {
@@ -33,6 +39,7 @@ export default function DashboardPage() {
         </button>
       </div>
 
+      
       {/* Body */}
       <div className="max-w-4xl mx-auto px-8 py-16 text-center">
         <h1 className="text-3xl font-bold text-neutral-900 mb-2">Dashboard</h1>
